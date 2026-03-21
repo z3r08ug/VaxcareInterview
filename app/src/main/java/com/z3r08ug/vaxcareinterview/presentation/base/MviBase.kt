@@ -1,64 +1,56 @@
 package com.z3r08ug.vaxcareinterview.presentation.base
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
+interface ViewEvent
 interface ViewState
-interface ViewIntent
 interface ViewSideEffect
 
-abstract class BaseViewModel<S : ViewState, I : ViewIntent, E : ViewSideEffect> : ViewModel() {
-    private val initialState: S by lazy { createInitialState() }
-    abstract fun createInitialState(): S
+const val SIDE_EFFECTS_KEY = "side_effects_key"
 
-    private val _currentState: MutableStateFlow<S> = MutableStateFlow(initialState)
-    val currentState: StateFlow<S> = _currentState.asStateFlow()
+abstract class BaseViewModel<Event : ViewEvent, UiState : ViewState, Effect : ViewSideEffect> : ViewModel() {
+    abstract fun setInitialState(): UiState
+    abstract fun handleEvents(event: Event)
 
-    private val _intent: MutableSharedFlow<I> = MutableSharedFlow()
-    val intent: SharedFlow<I> = _intent.asSharedFlow()
+    private val initialState: UiState by lazy { setInitialState() }
 
-    private val _effect: Channel<E> = Channel()
-    val effect: Flow<E> = _effect.receiveAsFlow()
+    private val _viewState: MutableState<UiState> = mutableStateOf(initialState)
+    val viewState: State<UiState> = _viewState
+
+    private val _event: MutableSharedFlow<Event> = MutableSharedFlow(extraBufferCapacity = 64)
+
+    private val _effect = Channel<Effect>(Channel.BUFFERED)
+    val effect = _effect.receiveAsFlow()
 
     init {
-        subscribeIntents()
+        subscribeToEvents()
     }
 
-    private fun subscribeIntents() {
+    private fun subscribeToEvents() {
         viewModelScope.launch {
-            _intent.collect {
-                handleIntent(it)
+            _event.collect {
+                handleEvents(it)
             }
         }
     }
 
-    abstract fun handleIntent(intent: I)
-
-    fun setIntent(intent: I) {
-        viewModelScope.launch {
-            _intent.emit(intent)
-        }
+    fun setEvent(event: Event) {
+        _event.tryEmit(event)
     }
 
-    protected fun setState(reduce: S.() -> S) {
-        val newState = currentState.value.reduce()
-        _currentState.value = newState
+    protected fun setState(reducer: UiState.() -> UiState) {
+        _viewState.value = _viewState.value.reducer()
     }
 
-    protected fun setEffect(builder: () -> E) {
-        val effectValue = builder()
-        viewModelScope.launch {
-            _effect.send(effectValue)
-        }
+    fun setEffect(builder: () -> Effect) {
+        viewModelScope.launch { _effect.send(builder()) }
     }
 }

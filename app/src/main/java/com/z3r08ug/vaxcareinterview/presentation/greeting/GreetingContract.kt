@@ -1,18 +1,20 @@
 package com.z3r08ug.vaxcareinterview.presentation.greeting
 
-import com.z3r08ug.vaxcareinterview.presentation.base.ViewIntent
+import com.z3r08ug.vaxcareinterview.presentation.base.ViewEvent
 import com.z3r08ug.vaxcareinterview.presentation.base.ViewSideEffect
 import com.z3r08ug.vaxcareinterview.presentation.base.ViewState
 
-sealed class GreetingIntent : ViewIntent {
-    object OnButtonClicked : GreetingIntent()
-}
+object GreetingContract {
+    sealed class Event : ViewEvent {
+        data object OnButtonClicked : Event()
+    }
 
-data class GreetingState(
-    val name: String = "Android",
-    val buttonClicked: Boolean = false
-) : ViewState
+    data class State(
+        val name: String = "Android",
+        val buttonClicked: Boolean = false
+    ) : ViewState
 
-sealed class GreetingEffect : ViewSideEffect {
-    object ShowToast : GreetingEffect()
+    sealed class Effect : ViewSideEffect {
+        data object ShowToast : Effect()
+    }
 }

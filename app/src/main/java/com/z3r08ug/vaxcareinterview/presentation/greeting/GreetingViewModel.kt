@@ -8,17 +8,17 @@ import javax.inject.Inject
 @HiltViewModel
 class GreetingViewModel @Inject constructor(
     private val getGreetingUseCase: GetGreetingUseCase
-) : BaseViewModel<GreetingState, GreetingIntent, GreetingEffect>() {
+) : BaseViewModel<GreetingContract.Event, GreetingContract.State, GreetingContract.Effect>() {
 
-    override fun createInitialState(): GreetingState {
-        return GreetingState(name = getGreetingUseCase())
+    override fun setInitialState(): GreetingContract.State {
+        return GreetingContract.State(name = getGreetingUseCase())
     }
 
-    override fun handleIntent(intent: GreetingIntent) {
-        when (intent) {
-            is GreetingIntent.OnButtonClicked -> {
+    override fun handleEvents(event: GreetingContract.Event) {
+        when (event) {
+            is GreetingContract.Event.OnButtonClicked -> {
                 setState { copy(buttonClicked = true) }
-                setEffect { GreetingEffect.ShowToast }
+                setEffect { GreetingContract.Effect.ShowToast }
             }
         }
     }

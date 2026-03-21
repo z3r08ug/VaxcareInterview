@@ -9,23 +9,23 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.z3r08ug.vaxcareinterview.presentation.base.SIDE_EFFECTS_KEY
 
 @Composable
 fun GreetingScreen(
     viewModel: GreetingViewModel = hiltViewModel()
 ) {
-    val state by viewModel.currentState.collectAsState()
+    val state by viewModel.viewState
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(SIDE_EFFECTS_KEY) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                GreetingEffect.ShowToast -> {
+                GreetingContract.Effect.ShowToast -> {
                     Toast.makeText(context, "Button Clicked!", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -37,7 +37,7 @@ fun GreetingScreen(
             name = state.name,
             modifier = Modifier.padding(innerPadding),
             onButtonClicked = {
-                viewModel.setIntent(GreetingIntent.OnButtonClicked)
+                viewModel.setEvent(GreetingContract.Event.OnButtonClicked)
             }
         )
     }

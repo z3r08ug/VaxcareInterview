@@ -5,6 +5,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.z3r08ug.vaxcareinterview.presentation.greeting.GreetingScreen
+import kotlinx.serialization.Serializable
+
+@Serializable
+data object GreetingRoute
 
 @Composable
 fun AppNavigation() {
@@ -12,9 +16,9 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = "greeting"
+        startDestination = GreetingRoute
     ) {
-        composable("greeting") {
+        composable<GreetingRoute> {
             GreetingScreen()
         }
     }
