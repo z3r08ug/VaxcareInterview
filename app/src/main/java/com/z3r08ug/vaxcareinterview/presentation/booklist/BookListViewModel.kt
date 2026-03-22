@@ -1,6 +1,7 @@
 package com.z3r08ug.vaxcareinterview.presentation.booklist
 
 import androidx.lifecycle.viewModelScope
+import com.z3r08ug.vaxcareinterview.domain.model.Book
 import com.z3r08ug.vaxcareinterview.domain.usecase.GetBooksUseCase
 import com.z3r08ug.vaxcareinterview.domain.usecase.RefreshBooksUseCase
 import com.z3r08ug.vaxcareinterview.domain.usecase.ToggleFavoriteUseCase
@@ -18,6 +19,8 @@ class BookListViewModel @Inject constructor(
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
 ) : BaseViewModel<BookListContract.Event, BookListContract.State, BookListContract.Effect>() {
 
+    private var rawBooks: List<Book> = emptyList()
+
     override fun setInitialState(): BookListContract.State {
         return BookListContract.State(isLoading = true)
     }
@@ -30,7 +33,8 @@ class BookListViewModel @Inject constructor(
     private fun observeBooks() {
         getBooksUseCase()
             .onEach { books ->
-                setState { copy(books = books, isLoading = false) }
+                rawBooks = books
+                updateSortedBooks()
             }
             .launchIn(viewModelScope)
     }
@@ -46,7 +50,25 @@ class BookListViewModel @Inject constructor(
                     toggleFavoriteUseCase(event.book.id, !event.book.isFavorite)
                 }
             }
+            is BookListContract.Event.ToggleSortOrder -> {
+                val newOrder = if (viewState.value.sortOrder == BookListContract.SortOrder.ASCENDING) {
+                    BookListContract.SortOrder.DESCENDING
+                } else {
+                    BookListContract.SortOrder.ASCENDING
+                }
+                setState { copy(sortOrder = newOrder) }
+                updateSortedBooks()
+            }
         }
+    }
+
+    private fun updateSortedBooks() {
+        val sorted = if (viewState.value.sortOrder == BookListContract.SortOrder.ASCENDING) {
+            rawBooks.sortedBy { it.title }
+        } else {
+            rawBooks.sortedByDescending { it.title }
+        }
+        setState { copy(books = sorted, isLoading = false) }
     }
 
     private fun refreshBooks() {

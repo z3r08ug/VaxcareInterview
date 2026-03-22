@@ -46,7 +46,7 @@ class BookListViewModelTest {
         
         every { getBooksUseCase() } returns booksFlow
         coEvery { refreshBooksUseCase() } coAnswers {
-            // Simulate database update which triggers flow emission with a new list
+            // Trigger a flow emission to simulate database update
             booksFlow.value = listOf(createBook(1))
             Result.success(Unit)
         }
@@ -116,5 +116,27 @@ class BookListViewModelTest {
         viewModel.setEvent(BookListContract.Event.OnFavoriteClicked(book))
 
         coVerify { toggleFavoriteUseCase(1, true) }
+    }
+
+    @Test
+    fun `when ToggleSortOrder event is sent, books are re-sorted`() = runTest {
+        val book1 = createBook(1).copy(title = "B Title")
+        val book2 = createBook(2).copy(title = "A Title")
+        
+        // Setup initial flow to return some items and then trigger sorting
+        coEvery { refreshBooksUseCase() } returns Result.success(Unit)
+        booksFlow.value = listOf(book1, book2)
+
+        val viewModel = BookListViewModel(getBooksUseCase, refreshBooksUseCase, toggleFavoriteUseCase)
+        
+        // Default is ASCENDING
+        assertEquals("A Title", viewModel.viewState.value.books[0].title)
+        assertEquals("B Title", viewModel.viewState.value.books[1].title)
+
+        viewModel.setEvent(BookListContract.Event.ToggleSortOrder)
+
+        assertEquals(BookListContract.SortOrder.DESCENDING, viewModel.viewState.value.sortOrder)
+        assertEquals("B Title", viewModel.viewState.value.books[0].title)
+        assertEquals("A Title", viewModel.viewState.value.books[1].title)
     }
 }

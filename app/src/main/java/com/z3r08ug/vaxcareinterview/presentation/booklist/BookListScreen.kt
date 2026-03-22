@@ -19,6 +19,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -58,7 +59,17 @@ fun BookListScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(text = "Book List") })
+            TopAppBar(
+                title = { Text(text = "Book List") },
+                actions = {
+                    TextButton(onClick = { viewModel.setEvent(BookListContract.Event.ToggleSortOrder) }) {
+                        Text(
+                            text = if (state.sortOrder == BookListContract.SortOrder.ASCENDING) "A-Z" else "Z-A",
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
+                },
+            )
         }
     ) { padding ->
         BookListContent(
