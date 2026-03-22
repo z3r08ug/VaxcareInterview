@@ -35,7 +35,6 @@ fun BookListScreen(
 ) {
     val state by viewModel.viewState
     val context = LocalContext.current
-    val pullToRefreshState = rememberPullToRefreshState()
 
     LaunchedEffect(SIDE_EFFECTS_KEY) {
         viewModel.effect.collect { effect ->
@@ -55,31 +54,44 @@ fun BookListScreen(
             TopAppBar(title = { Text(text = "Book List") })
         }
     ) { padding ->
-        PullToRefreshBox(
-            isRefreshing = state.isLoading,
+        BookListContent(
+            state = state,
+            modifier = Modifier.padding(padding),
             onRefresh = { viewModel.setEvent(BookListContract.Event.LoadBooks) },
-            state = pullToRefreshState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            if (state.error != null && !state.isLoading) {
-                Text(
-                    text = state.error ?: "Unknown error",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(state.books) { book ->
-                        BookItem(
-                            book = book,
-                            onClick = {
-                                viewModel.setEvent(BookListContract.Event.OnBookClicked(book))
-                            }
-                        )
-                        HorizontalDivider()
-                    }
+            onBookClick = { viewModel.setEvent(BookListContract.Event.OnBookClicked(it)) }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BookListContent(
+    state: BookListContract.State,
+    modifier: Modifier = Modifier,
+    onRefresh: () -> Unit,
+    onBookClick: (Book) -> Unit
+) {
+    val pullToRefreshState = rememberPullToRefreshState()
+    PullToRefreshBox(
+        isRefreshing = state.isLoading,
+        onRefresh = onRefresh,
+        state = pullToRefreshState,
+        modifier = modifier.fillMaxSize()
+    ) {
+        if (state.error != null && !state.isLoading) {
+            Text(
+                text = state.error,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(state.books) { book ->
+                    BookItem(
+                        book = book,
+                        onClick = { onBookClick(book) }
+                    )
+                    HorizontalDivider()
                 }
             }
         }
