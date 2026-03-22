@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.z3r08ug.vaxcareinterview.domain.model.Book
 import com.z3r08ug.vaxcareinterview.domain.model.BookStatus
 import com.z3r08ug.vaxcareinterview.domain.usecase.GetBookByIdUseCase
+import com.z3r08ug.vaxcareinterview.domain.usecase.ToggleFavoriteUseCase
 import com.z3r08ug.vaxcareinterview.presentation.navigation.BookDetailRoute
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -13,6 +14,7 @@ import io.mockk.mockkStatic
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -29,6 +31,9 @@ class BookDetailViewModelTest {
 
     @MockK
     lateinit var getBookByIdUseCase: GetBookByIdUseCase
+
+    @MockK
+    lateinit var toggleFavoriteUseCase: ToggleFavoriteUseCase
 
     @MockK
     lateinit var savedStateHandle: SavedStateHandle
@@ -51,6 +56,7 @@ class BookDetailViewModelTest {
         status = BookStatus(1, "OnShelf"),
         fee = 1.0,
         lastEdited = "",
+        isFavorite = false,
     )
 
     @After
@@ -61,9 +67,9 @@ class BookDetailViewModelTest {
     @Test
     fun `when viewmodel is initialized, book is loaded`() = runTest {
         val book = createBook(1)
-        coEvery { getBookByIdUseCase(1) } returns book
+        every { getBookByIdUseCase(1) } returns flowOf(book)
 
-        val viewModel = BookDetailViewModel(getBookByIdUseCase, savedStateHandle)
+        val viewModel = BookDetailViewModel(getBookByIdUseCase, toggleFavoriteUseCase, savedStateHandle)
 
         assertEquals(book, viewModel.viewState.value.book)
         assertFalse(viewModel.viewState.value.isLoading)
@@ -71,21 +77,34 @@ class BookDetailViewModelTest {
 
     @Test
     fun `when book is not found, error state is updated`() = runTest {
-        coEvery { getBookByIdUseCase(1) } returns null
+        every { getBookByIdUseCase(1) } returns flowOf(null)
 
-        val viewModel = BookDetailViewModel(getBookByIdUseCase, savedStateHandle)
+        val viewModel = BookDetailViewModel(getBookByIdUseCase, toggleFavoriteUseCase, savedStateHandle)
 
         assertEquals("Book not found", viewModel.viewState.value.error)
     }
 
     @Test
     fun `when OnBackClicked event is sent, NavigateBack effect is produced`() = runTest {
-        coEvery { getBookByIdUseCase(1) } returns createBook(1)
-        val viewModel = BookDetailViewModel(getBookByIdUseCase, savedStateHandle)
+        every { getBookByIdUseCase(1) } returns flowOf(createBook(1))
+        val viewModel = BookDetailViewModel(getBookByIdUseCase, toggleFavoriteUseCase, savedStateHandle)
 
         viewModel.setEvent(BookDetailContract.Event.OnBackClicked)
 
         val effect = viewModel.effect.first()
         assertEquals(BookDetailContract.Effect.NavigateBack, effect)
+    }
+
+    @Test
+    fun `when OnFavoriteClicked event is sent, toggleFavoriteUseCase is called`() = runTest {
+        val book = createBook(1)
+        every { getBookByIdUseCase(1) } returns flowOf(book)
+        coEvery { toggleFavoriteUseCase(1, true) } returns Unit
+        
+        val viewModel = BookDetailViewModel(getBookByIdUseCase, toggleFavoriteUseCase, savedStateHandle)
+
+        viewModel.setEvent(BookDetailContract.Event.OnFavoriteClicked(book))
+
+        io.mockk.coVerify { toggleFavoriteUseCase(1, true) }
     }
 }

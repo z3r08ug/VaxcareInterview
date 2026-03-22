@@ -9,6 +9,7 @@ object BookDetailContract {
     sealed class Event : ViewEvent {
         data class LoadBook(val bookId: Int) : Event()
         data object OnBackClicked : Event()
+        data class OnFavoriteClicked(val book: Book) : Event()
     }
 
     data class State(

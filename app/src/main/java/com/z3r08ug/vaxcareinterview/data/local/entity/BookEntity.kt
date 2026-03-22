@@ -14,6 +14,7 @@ data class BookEntity(
     @Embedded(prefix = "status_") val status: BookStatusEntity,
     val fee: Double,
     val lastEdited: String,
+    val isFavorite: Boolean,
 )
 
 data class BookStatusEntity(
@@ -36,7 +37,8 @@ fun BookEntity.toDomain(): Book = Book(
         dueDate = status.dueDate
     ),
     fee = fee,
-    lastEdited = lastEdited
+    lastEdited = lastEdited,
+    isFavorite = isFavorite,
 )
 
 fun Book.toEntity(): BookEntity = BookEntity(
@@ -48,8 +50,9 @@ fun Book.toEntity(): BookEntity = BookEntity(
         displayText = status.displayText,
         timeCheckedIn = status.timeCheckedIn,
         timeCheckedOut = status.timeCheckedOut,
-        dueDate = status.dueDate
+        dueDate = status.dueDate,
     ),
     fee = fee,
-    lastEdited = lastEdited
+    lastEdited = lastEdited,
+    isFavorite = isFavorite,
 )

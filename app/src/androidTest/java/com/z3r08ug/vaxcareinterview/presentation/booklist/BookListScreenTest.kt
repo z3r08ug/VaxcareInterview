@@ -28,7 +28,9 @@ class BookListScreenTest {
             BookListContent(
                 state = state,
                 onRefresh = {},
-            ) {}
+                onFavoriteClick = {},
+                onBookClick = {},
+            )
         }
 
         composeTestRule.onNodeWithText("Title 1").assertIsDisplayed()
@@ -46,7 +48,8 @@ class BookListScreenTest {
             BookListContent(
                 state = state,
                 onRefresh = {},
-                onBookClick = onBookClick
+                onFavoriteClick = {},
+                onBookClick = onBookClick,
             )
         }
 
@@ -64,7 +67,9 @@ class BookListScreenTest {
             BookListContent(
                 state = state,
                 onRefresh = {},
-            ) {}
+                onFavoriteClick = {},
+                onBookClick = {},
+            )
         }
 
         composeTestRule.onNodeWithText(error).assertIsDisplayed()

@@ -42,6 +42,7 @@ class BookRepositoryImplTest {
         status = BookStatusEntity(1, "OnShelf", null, null, null),
         fee = 1.0,
         lastEdited = "",
+        isFavorite = false,
     )
 
     private fun createBookDto(id: Int) = BookDto(
@@ -69,6 +70,7 @@ class BookRepositoryImplTest {
     fun `refreshBooks should fetch from service and update dao`() = runTest {
         val bookDtos = listOf(createBookDto(1))
         
+        every { bookDao.getAllBooks() } returns flowOf(emptyList())
         coEvery { bookService.getBooks() } returns bookDtos
         coEvery { bookDao.clearBooks() } returns Unit
         coEvery { bookDao.insertBooks(any()) } returns Unit
@@ -86,9 +88,9 @@ class BookRepositoryImplTest {
         val bookEntity = createBookEntity(bookId)
         val domainBook = bookEntity.toDomain()
         
-        coEvery { bookDao.getBookById(bookId) } returns bookEntity
+        every { bookDao.getBookById(bookId) } returns flowOf(bookEntity)
 
-        val result = bookRepository.getBookById(bookId)
+        val result = bookRepository.getBookById(bookId).first()
 
         assertEquals(domainBook, result)
     }
@@ -96,10 +98,19 @@ class BookRepositoryImplTest {
     @Test
     fun `getBookById should return null when dao returns null`() = runTest {
         val bookId = 1
-        coEvery { bookDao.getBookById(bookId) } returns null
+        every { bookDao.getBookById(bookId) } returns flowOf(null)
 
-        val result = bookRepository.getBookById(bookId)
+        val result = bookRepository.getBookById(bookId).first()
 
         assertEquals(null, result)
+    }
+
+    @Test
+    fun `toggleFavorite should call dao update`() = runTest {
+        coEvery { bookDao.updateFavoriteStatus(1, true) } returns Unit
+
+        bookRepository.toggleFavorite(1, true)
+
+        coVerify(exactly = 1) { bookDao.updateFavoriteStatus(1, true) }
     }
 }

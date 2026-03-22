@@ -8,8 +8,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -21,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -58,6 +65,7 @@ fun BookListScreen(
             state = state,
             modifier = Modifier.padding(padding),
             onRefresh = { viewModel.setEvent(BookListContract.Event.LoadBooks) },
+            onFavoriteClick = { viewModel.setEvent(BookListContract.Event.OnFavoriteClicked(it)) },
         ) { viewModel.setEvent(BookListContract.Event.OnBookClicked(it)) }
     }
 }
@@ -68,26 +76,30 @@ fun BookListContent(
     state: BookListContract.State,
     modifier: Modifier = Modifier,
     onRefresh: () -> Unit,
-    onBookClick: (Book) -> Unit
+    onFavoriteClick: (Book) -> Unit,
+    onBookClick: (Book) -> Unit,
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
     PullToRefreshBox(
         isRefreshing = state.isLoading,
         onRefresh = onRefresh,
         state = pullToRefreshState,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
     ) {
-        if ((state.error != null) && !state.isLoading) {
+        if ((state.error != null) && !state.isLoading && state.books.isEmpty()) {
             Text(
                 text = state.error,
                 color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.align(Alignment.Center)
+                modifier = Modifier.align(Alignment.Center),
             )
+        } else if (state.isLoading && state.books.isEmpty()) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(state.books) { book ->
                     BookItem(
                         book = book,
+                        onFavoriteClick = { onFavoriteClick(book) },
                     ) { onBookClick(book) }
                     HorizontalDivider()
                 }
@@ -99,16 +111,27 @@ fun BookListContent(
 @Composable
 fun BookItem(
     book: Book,
-    onClick: () -> Unit
+    onFavoriteClick: () -> Unit,
+    onClick: () -> Unit,
 ) {
-    Column(
+    androidx.compose.foundation.layout.Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text = book.title, style = MaterialTheme.typography.titleMedium)
-        Text(text = book.author, style = MaterialTheme.typography.bodyMedium)
-        Text(text = "Status: ${book.status.displayText}", style = MaterialTheme.typography.bodySmall)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = book.title, style = MaterialTheme.typography.titleMedium)
+            Text(text = book.author, style = MaterialTheme.typography.bodyMedium)
+            Text(text = "Status: ${book.status.displayText}", style = MaterialTheme.typography.bodySmall)
+        }
+        IconButton(onClick = onFavoriteClick) {
+            Icon(
+                imageVector = if (book.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = "Favorite",
+                tint = if (book.isFavorite) Color.Red else Color.Gray,
+            )
+        }
     }
 }

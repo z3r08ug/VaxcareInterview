@@ -3,6 +3,7 @@ package com.z3r08ug.vaxcareinterview.presentation.booklist
 import androidx.lifecycle.viewModelScope
 import com.z3r08ug.vaxcareinterview.domain.usecase.GetBooksUseCase
 import com.z3r08ug.vaxcareinterview.domain.usecase.RefreshBooksUseCase
+import com.z3r08ug.vaxcareinterview.domain.usecase.ToggleFavoriteUseCase
 import com.z3r08ug.vaxcareinterview.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
@@ -14,6 +15,7 @@ import javax.inject.Inject
 class BookListViewModel @Inject constructor(
     private val getBooksUseCase: GetBooksUseCase,
     private val refreshBooksUseCase: RefreshBooksUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
 ) : BaseViewModel<BookListContract.Event, BookListContract.State, BookListContract.Effect>() {
 
     override fun setInitialState(): BookListContract.State {
@@ -38,6 +40,11 @@ class BookListViewModel @Inject constructor(
             is BookListContract.Event.LoadBooks -> refreshBooks()
             is BookListContract.Event.OnBookClicked -> {
                 setEffect { BookListContract.Effect.NavigateToDetails(event.book.id) }
+            }
+            is BookListContract.Event.OnFavoriteClicked -> {
+                viewModelScope.launch {
+                    toggleFavoriteUseCase(event.book.id, !event.book.isFavorite)
+                }
             }
         }
     }

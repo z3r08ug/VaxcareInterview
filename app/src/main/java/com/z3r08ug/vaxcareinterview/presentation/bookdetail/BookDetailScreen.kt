@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -19,8 +21,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.z3r08ug.vaxcareinterview.domain.model.Book
 import com.z3r08ug.vaxcareinterview.presentation.base.SIDE_EFFECTS_KEY
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,13 +51,24 @@ fun BookDetailScreen(
                     IconButton(onClick = { viewModel.setEvent(BookDetailContract.Event.OnBackClicked) }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                actions = {
+                    state.book?.let { book ->
+                        IconButton(onClick = { viewModel.setEvent(BookDetailContract.Event.OnFavoriteClicked(book)) }) {
+                            Icon(
+                                imageVector = if (book.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = "Favorite",
+                                tint = if (book.isFavorite) Color.Red else Color.White,
+                            )
+                        }
+                    }
+                },
             )
         }
     ) { padding ->
         BookDetailContent(
             state = state,
-            modifier = Modifier.padding(padding)
+            modifier = Modifier.padding(padding),
         )
     }
 }

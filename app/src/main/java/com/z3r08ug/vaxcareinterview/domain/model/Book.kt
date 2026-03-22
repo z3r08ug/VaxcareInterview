@@ -7,6 +7,7 @@ data class Book(
     val status: BookStatus,
     val fee: Double,
     val lastEdited: String,
+    val isFavorite: Boolean = false,
 )
 
 data class BookStatus(

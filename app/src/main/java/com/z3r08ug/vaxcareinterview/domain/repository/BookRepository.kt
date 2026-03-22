@@ -6,5 +6,6 @@ import kotlinx.coroutines.flow.Flow
 interface BookRepository {
     fun getBooks(): Flow<List<Book>>
     suspend fun refreshBooks()
-    suspend fun getBookById(id: Int): Book?
+    fun getBookById(id: Int): Flow<Book?>
+    suspend fun toggleFavorite(id: Int, isFavorite: Boolean)
 }

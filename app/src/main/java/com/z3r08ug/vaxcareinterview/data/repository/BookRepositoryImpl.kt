@@ -8,6 +8,7 @@ import com.z3r08ug.vaxcareinterview.data.model.toDomain
 import com.z3r08ug.vaxcareinterview.domain.model.Book
 import com.z3r08ug.vaxcareinterview.domain.repository.BookRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -24,12 +25,25 @@ class BookRepositoryImpl @Inject constructor(
 
     override suspend fun refreshBooks() {
         val response = bookService.getBooks()
-        val books = response.map { it.toDomain() }
+        val networkBooks = response.map { it.toDomain() }
+        
+        // Preserve favorite status from current local data
+        val currentBooks = bookDao.getAllBooks().first()
+        val favoriteIds = currentBooks.filter { it.isFavorite }.map { it.id }.toSet()
+        
+        val updatedEntities = networkBooks.map { book ->
+            book.copy(isFavorite = favoriteIds.contains(book.id)).toEntity()
+        }
+        
         bookDao.clearBooks()
-        bookDao.insertBooks(books.map { it.toEntity() })
+        bookDao.insertBooks(updatedEntities)
     }
 
-    override suspend fun getBookById(id: Int): Book? {
-        return bookDao.getBookById(id)?.toDomain()
+    override fun getBookById(id: Int): Flow<Book?> {
+        return bookDao.getBookById(id).map { it?.toDomain() }
+    }
+
+    override suspend fun toggleFavorite(id: Int, isFavorite: Boolean) {
+        bookDao.updateFavoriteStatus(id, isFavorite)
     }
 }

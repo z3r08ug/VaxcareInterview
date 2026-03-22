@@ -4,6 +4,7 @@ import com.z3r08ug.vaxcareinterview.domain.model.Book
 import com.z3r08ug.vaxcareinterview.domain.model.BookStatus
 import com.z3r08ug.vaxcareinterview.domain.usecase.GetBooksUseCase
 import com.z3r08ug.vaxcareinterview.domain.usecase.RefreshBooksUseCase
+import com.z3r08ug.vaxcareinterview.domain.usecase.ToggleFavoriteUseCase
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -32,6 +33,9 @@ class BookListViewModelTest {
     @MockK
     lateinit var refreshBooksUseCase: RefreshBooksUseCase
 
+    @MockK
+    lateinit var toggleFavoriteUseCase: ToggleFavoriteUseCase
+
     private val testDispatcher = UnconfinedTestDispatcher()
     private val booksFlow = MutableStateFlow<List<Book>>(emptyList())
 
@@ -55,6 +59,7 @@ class BookListViewModelTest {
         status = BookStatus(1, "OnShelf"),
         fee = 1.0,
         lastEdited = "",
+        isFavorite = false,
     )
 
     @After
@@ -64,7 +69,7 @@ class BookListViewModelTest {
 
     @Test
     fun `when loadBooks is called, isLoading is updated`() {
-        val viewModel = BookListViewModel(getBooksUseCase, refreshBooksUseCase)
+        val viewModel = BookListViewModel(getBooksUseCase, refreshBooksUseCase, toggleFavoriteUseCase)
         
         // Initial call in init should have finished
         assertFalse(viewModel.viewState.value.isLoading)
@@ -72,7 +77,7 @@ class BookListViewModelTest {
 
     @Test
     fun `when LoadBooks event is sent, refreshBooksUseCase is called`() {
-        val viewModel = BookListViewModel(getBooksUseCase, refreshBooksUseCase)
+        val viewModel = BookListViewModel(getBooksUseCase, refreshBooksUseCase, toggleFavoriteUseCase)
         
         viewModel.setEvent(BookListContract.Event.LoadBooks)
 
@@ -84,7 +89,7 @@ class BookListViewModelTest {
         val errorMsg = "Network error"
         coEvery { refreshBooksUseCase() } returns Result.failure(Exception(errorMsg))
         
-        val viewModel = BookListViewModel(getBooksUseCase, refreshBooksUseCase)
+        val viewModel = BookListViewModel(getBooksUseCase, refreshBooksUseCase, toggleFavoriteUseCase)
         
         assertEquals(errorMsg, viewModel.viewState.value.error)
         val effect = viewModel.effect.first()
@@ -94,11 +99,22 @@ class BookListViewModelTest {
     @Test
     fun `when OnBookClicked event is sent, NavigateToDetails effect is produced`() = runTest {
         val book = createBook(1)
-        val viewModel = BookListViewModel(getBooksUseCase, refreshBooksUseCase)
+        val viewModel = BookListViewModel(getBooksUseCase, refreshBooksUseCase, toggleFavoriteUseCase)
         
         viewModel.setEvent(BookListContract.Event.OnBookClicked(book))
 
         val effect = viewModel.effect.first()
         assert(effect is BookListContract.Effect.NavigateToDetails && effect.bookId == 1)
+    }
+
+    @Test
+    fun `when OnFavoriteClicked event is sent, toggleFavoriteUseCase is called`() = runTest {
+        val book = createBook(1)
+        coEvery { toggleFavoriteUseCase(1, true) } returns Unit
+        val viewModel = BookListViewModel(getBooksUseCase, refreshBooksUseCase, toggleFavoriteUseCase)
+        
+        viewModel.setEvent(BookListContract.Event.OnFavoriteClicked(book))
+
+        coVerify { toggleFavoriteUseCase(1, true) }
     }
 }
