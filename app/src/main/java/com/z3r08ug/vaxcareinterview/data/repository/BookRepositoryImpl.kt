@@ -1,20 +1,35 @@
 package com.z3r08ug.vaxcareinterview.data.repository
 
-import com.z3r08ug.vaxcareinterview.data.model.BookDto
+import com.z3r08ug.vaxcareinterview.data.local.dao.BookDao
+import com.z3r08ug.vaxcareinterview.data.local.entity.toDomain
+import com.z3r08ug.vaxcareinterview.data.local.entity.toEntity
+import com.z3r08ug.vaxcareinterview.data.remote.BookService
 import com.z3r08ug.vaxcareinterview.data.model.toDomain
 import com.z3r08ug.vaxcareinterview.domain.model.Book
 import com.z3r08ug.vaxcareinterview.domain.repository.BookRepository
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.get
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class BookRepositoryImpl @Inject constructor(
-    private val client: HttpClient
+    private val bookService: BookService,
+    private val bookDao: BookDao
 ) : BookRepository {
 
-    override suspend fun getBooks(): List<Book> {
-        val response: List<BookDto> = client.get("https://gist.githubusercontent.com/android-test-vaxcare/27bd7ab7d0381f867723225145694e93/raw/c530190f575aaac1ab8d5c416b2da9553be422fe/local-database2.json").body()
-        return response.map { it.toDomain() }
+    override fun getBooks(): Flow<List<Book>> {
+        return bookDao.getAllBooks().map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override suspend fun refreshBooks() {
+        val response = bookService.getBooks()
+        val books = response.map { it.toDomain() }
+        bookDao.clearBooks()
+        bookDao.insertBooks(books.map { it.toEntity() })
+    }
+
+    override suspend fun getBookById(id: Int): Book? {
+        return bookDao.getBookById(id)?.toDomain()
     }
 }
