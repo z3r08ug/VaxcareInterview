@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 class BookRepositoryImpl @Inject constructor(
     private val bookService: BookService,
-    private val bookDao: BookDao
+    private val bookDao: BookDao,
 ) : BookRepository {
 
     override fun getBooks(): Flow<List<Book>> {

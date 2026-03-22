@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetBooksUseCase @Inject constructor(
-    private val repository: BookRepository
+    private val repository: BookRepository,
 ) {
     operator fun invoke(): Flow<List<Book>> {
         return repository.getBooks()

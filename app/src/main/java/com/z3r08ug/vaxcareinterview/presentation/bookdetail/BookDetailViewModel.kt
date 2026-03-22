@@ -13,7 +13,7 @@ import javax.inject.Inject
 @HiltViewModel
 class BookDetailViewModel @Inject constructor(
     private val getBookByIdUseCase: GetBookByIdUseCase,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
 ) : BaseViewModel<BookDetailContract.Event, BookDetailContract.State, BookDetailContract.Effect>() {
 
     private val bookId: Int = savedStateHandle.toRoute<BookDetailRoute>().id

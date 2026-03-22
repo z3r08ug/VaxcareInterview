@@ -13,7 +13,7 @@ data class BookEntity(
     val author: String,
     @Embedded(prefix = "status_") val status: BookStatusEntity,
     val fee: Double,
-    val lastEdited: String
+    val lastEdited: String,
 )
 
 data class BookStatusEntity(

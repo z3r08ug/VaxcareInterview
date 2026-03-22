@@ -54,7 +54,7 @@ class BookListViewModelTest {
         author = "Author $id",
         status = BookStatus(1, "OnShelf"),
         fee = 1.0,
-        lastEdited = ""
+        lastEdited = "",
     )
 
     @After
@@ -88,7 +88,7 @@ class BookListViewModelTest {
         
         assertEquals(errorMsg, viewModel.viewState.value.error)
         val effect = viewModel.effect.first()
-        assert(effect is BookListContract.Effect.ShowError && effect.message == errorMsg)
+        assert((effect is BookListContract.Effect.ShowError) && (effect.message == errorMsg))
     }
 
     @Test

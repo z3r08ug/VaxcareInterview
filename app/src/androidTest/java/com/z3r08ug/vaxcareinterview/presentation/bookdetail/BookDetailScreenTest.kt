@@ -21,7 +21,7 @@ class BookDetailScreenTest {
             author = "Brian W Kernighan",
             status = BookStatus(1, "OnShelf", timeCheckedIn = "1978-02-22T20:30"),
             fee = 2.0,
-            lastEdited = "1978-02-22T20:30:00.00Z"
+            lastEdited = "1978-02-22T20:30:00.00Z",
         )
         val state = BookDetailContract.State(book = book)
 

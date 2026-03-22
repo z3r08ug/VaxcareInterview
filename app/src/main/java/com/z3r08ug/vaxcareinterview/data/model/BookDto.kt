@@ -11,7 +11,7 @@ data class BookDto(
     val author: String,
     val status: BookStatusDto,
     val fee: Double,
-    val lastEdited: String
+    val lastEdited: String,
 )
 
 @Serializable

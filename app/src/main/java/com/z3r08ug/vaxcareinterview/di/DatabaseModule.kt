@@ -21,7 +21,7 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "vaxcare_database"
+            "vaxcare_database",
         ).build()
     }
 

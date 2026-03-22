@@ -50,7 +50,7 @@ class BookDetailViewModelTest {
         author = "Author $id",
         status = BookStatus(1, "OnShelf"),
         fee = 1.0,
-        lastEdited = ""
+        lastEdited = "",
     )
 
     @After

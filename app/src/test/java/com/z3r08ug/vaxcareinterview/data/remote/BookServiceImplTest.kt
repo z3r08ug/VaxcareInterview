@@ -12,7 +12,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -34,7 +33,7 @@ class BookServiceImplTest {
     @Test
     fun `getBooks should return list of books when response is success`() = runTest {
         val books = listOf(
-            BookDto(1, "Title 1", "Author 1", BookStatusDto(1, "OnShelf"), 1.0, "")
+            BookDto(1, "Title 1", "Author 1", BookStatusDto(1, "OnShelf"), 1.0, ""),
         )
         val responseJson = Json.encodeToString(books)
         

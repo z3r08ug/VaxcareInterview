@@ -27,7 +27,7 @@ import com.z3r08ug.vaxcareinterview.presentation.base.SIDE_EFFECTS_KEY
 @Composable
 fun BookDetailScreen(
     onBackClick: () -> Unit,
-    viewModel: BookDetailViewModel = hiltViewModel()
+    viewModel: BookDetailViewModel = hiltViewModel(),
 ) {
     val state by viewModel.viewState
 

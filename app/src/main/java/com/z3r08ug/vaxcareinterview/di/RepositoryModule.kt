@@ -15,6 +15,6 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindBookRepository(
-        bookRepositoryImpl: BookRepositoryImpl
+        bookRepositoryImpl: BookRepositoryImpl,
     ): BookRepository
 }

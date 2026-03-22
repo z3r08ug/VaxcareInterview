@@ -41,7 +41,7 @@ class BookRepositoryImplTest {
         author = "Author $id",
         status = BookStatusEntity(1, "OnShelf", null, null, null),
         fee = 1.0,
-        lastEdited = ""
+        lastEdited = "",
     )
 
     private fun createBookDto(id: Int) = BookDto(
@@ -50,7 +50,7 @@ class BookRepositoryImplTest {
         author = "Author $id",
         status = BookStatusDto(1, "OnShelf", null, null, null),
         fee = 1.0,
-        lastEdited = ""
+        lastEdited = "",
     )
 
     @Test

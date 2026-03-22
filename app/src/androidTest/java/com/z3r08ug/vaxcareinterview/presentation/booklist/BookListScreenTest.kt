@@ -20,7 +20,7 @@ class BookListScreenTest {
     fun bookList_displaysBooks() {
         val books = listOf(
             Book(1, "Title 1", "Author 1", BookStatus(1, "OnShelf"), 1.0, ""),
-            Book(2, "Title 2", "Author 2", BookStatus(1, "OnShelf"), 2.0, "")
+            Book(2, "Title 2", "Author 2", BookStatus(1, "OnShelf"), 2.0, ""),
         )
         val state = BookListContract.State(books = books)
 
@@ -28,8 +28,7 @@ class BookListScreenTest {
             BookListContent(
                 state = state,
                 onRefresh = {},
-                onBookClick = {}
-            )
+            ) {}
         }
 
         composeTestRule.onNodeWithText("Title 1").assertIsDisplayed()
@@ -65,8 +64,7 @@ class BookListScreenTest {
             BookListContent(
                 state = state,
                 onRefresh = {},
-                onBookClick = {}
-            )
+            ) {}
         }
 
         composeTestRule.onNodeWithText(error).assertIsDisplayed()

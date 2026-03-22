@@ -31,7 +31,7 @@ import com.z3r08ug.vaxcareinterview.presentation.base.SIDE_EFFECTS_KEY
 @Composable
 fun BookListScreen(
     onBookClick: (Int) -> Unit,
-    viewModel: BookListViewModel = hiltViewModel()
+    viewModel: BookListViewModel = hiltViewModel(),
 ) {
     val state by viewModel.viewState
     val context = LocalContext.current
@@ -58,8 +58,7 @@ fun BookListScreen(
             state = state,
             modifier = Modifier.padding(padding),
             onRefresh = { viewModel.setEvent(BookListContract.Event.LoadBooks) },
-            onBookClick = { viewModel.setEvent(BookListContract.Event.OnBookClicked(it)) }
-        )
+        ) { viewModel.setEvent(BookListContract.Event.OnBookClicked(it)) }
     }
 }
 
@@ -78,7 +77,7 @@ fun BookListContent(
         state = pullToRefreshState,
         modifier = modifier.fillMaxSize()
     ) {
-        if (state.error != null && !state.isLoading) {
+        if ((state.error != null) && !state.isLoading) {
             Text(
                 text = state.error,
                 color = MaterialTheme.colorScheme.error,
@@ -89,8 +88,7 @@ fun BookListContent(
                 items(state.books) { book ->
                     BookItem(
                         book = book,
-                        onClick = { onBookClick(book) }
-                    )
+                    ) { onBookClick(book) }
                     HorizontalDivider()
                 }
             }

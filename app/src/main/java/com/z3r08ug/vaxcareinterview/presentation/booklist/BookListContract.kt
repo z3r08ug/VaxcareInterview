@@ -14,7 +14,7 @@ object BookListContract {
     data class State(
         val isLoading: Boolean = false,
         val books: List<Book> = emptyList(),
-        val error: String? = null
+        val error: String? = null,
     ) : ViewState
 
     sealed class Effect : ViewSideEffect {

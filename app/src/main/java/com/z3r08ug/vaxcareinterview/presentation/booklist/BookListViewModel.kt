@@ -13,7 +13,7 @@ import javax.inject.Inject
 @HiltViewModel
 class BookListViewModel @Inject constructor(
     private val getBooksUseCase: GetBooksUseCase,
-    private val refreshBooksUseCase: RefreshBooksUseCase
+    private val refreshBooksUseCase: RefreshBooksUseCase,
 ) : BaseViewModel<BookListContract.Event, BookListContract.State, BookListContract.Effect>() {
 
     override fun setInitialState(): BookListContract.State {

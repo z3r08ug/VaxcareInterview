@@ -6,7 +6,7 @@ data class Book(
     val author: String,
     val status: BookStatus,
     val fee: Double,
-    val lastEdited: String
+    val lastEdited: String,
 )
 
 data class BookStatus(

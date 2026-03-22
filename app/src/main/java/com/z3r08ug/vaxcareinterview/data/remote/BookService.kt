@@ -15,7 +15,7 @@ interface BookService {
 }
 
 class BookServiceImpl @Inject constructor(
-    private val client: HttpClient
+    private val client: HttpClient,
 ) : BookService {
     override suspend fun getBooks(): List<BookDto> {
         return client.get(BookService.BASE_URL).body()

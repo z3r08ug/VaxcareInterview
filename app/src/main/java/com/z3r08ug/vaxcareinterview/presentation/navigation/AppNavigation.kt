@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
 import com.z3r08ug.vaxcareinterview.presentation.bookdetail.BookDetailScreen
 import com.z3r08ug.vaxcareinterview.presentation.booklist.BookListScreen
 import kotlinx.serialization.Serializable
@@ -21,7 +20,7 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = BookListRoute
+        startDestination = BookListRoute,
     ) {
         composable<BookListRoute> {
             BookListScreen(
